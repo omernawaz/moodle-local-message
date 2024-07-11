@@ -21,9 +21,14 @@
  */
 
 
-function get_type($message){
+use local_message\message_handler;
 
-    switch($message->typetext){
+
+
+function get_type($message)
+{
+
+    switch ($message->typetext) {
         case 'info':
             return \core\output\notification::NOTIFY_INFO;
             break;
@@ -39,46 +44,20 @@ function get_type($message){
     }
 }
 
-function insert_read_record($message) {
-
+function local_message_before_footer()
+{
     global $USER;
-    global $DB;
 
-    $readrecord = new stdClass();
-    $readrecord->message_id = $message->id;
-    $readrecord->user_id = $USER->id;
-    $readrecord->time_read = time();
-
-    $DB->insert_record('local_message_messages_read', $readrecord);
-}
-
-function local_message_before_footer() {
-
-    global $DB,$USER;
-
-    if($USER->id == 0)
+    if (!isloggedin() || !get_config('local_message', 'enabled')) {
         return;
-
-    //$messages = $DB->get_records('local_message_messages');
-
-    $sql = "SELECT lm.id,lm.body,lm.type,lm.typetext FROM {local_message_messages} lm 
-        LEFT JOIN {local_message_messages_read} lmr 
-        ON lm.id = lmr.message_id AND lmr.user_id = :userid
-        WHERE lmr.user_id IS NULL;
-    ";
-
-    $params = [
-        'userid' => $USER->id,
-    ];
-
-    $messages = $DB->get_records_sql($sql,$params);
+    }
 
 
+    $handler = new message_handler();
+    $messages = $handler->get_messages_user($USER->id);
 
-    foreach($messages as $message){
-
+    foreach ($messages as $message) {
         \core\notification::add($message->body, get_type($message));
-
-       insert_read_record($message);
+        $handler->mark_message_read($message->id, $USER->id);
     }
 }

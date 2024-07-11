@@ -8,6 +8,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+#plugin general
+$string['message:name'] = "Broadcast Messages";
+$string['message:enable'] = "Enable Broadcast Messages";
+$string['message:desc'] = "These are messages that are broadcasted to all users on the platform";
+$string['message:manage'] = "Manage Broadcast Messages";
 #manage page (manage.php)
 $string['manage:title'] = 'Broadcast Messages';
 $string['manage:list'] = 'List of current messages';
